@@ -1,0 +1,19 @@
+<h1>{{ template_data.title }}</h1>
+
+<h2>Most Reviewed Movie(s)</h2>
+<ul>
+{% for movie in template_data.most_reviewed_movies %}
+    <li>{{ movie.name }} - {{ movie.review_count }} reviews</li>
+{% empty %}
+    <li>No reviews yet</li>
+{% endfor %}
+</ul>
+
+<h2>Most Purchased Movie(s)</h2>
+<ul>
+{% for movie in template_data.most_purchased_movies %}
+    <li>{{ movie.name }} - {{ movie.purchase_count|default:0 }} purchases</li>
+{% empty %}
+    <li>No purchases yet</li>
+{% endfor %}
+</ul>

@@ -1,7 +1,9 @@
 from django.shortcuts import render, redirect, get_object_or_404
-from .models import Movie, Review, Rating
 from django.contrib.auth.decorators import login_required
-from django.db.models import Avg
+from django.db.models import Avg, Count, Sum, Max
+from cart.models import Order, Item
+from movies.models import Movie, Review, Rating
+
 
 def index(request):
     search_term = request.GET.get('search')
@@ -14,6 +16,7 @@ def index(request):
     template_data['title'] = 'Movies'
     template_data['movies'] = movies
     return render(request, 'movies/index.html', {'template_data': template_data})
+
 
 def show(request, id):
     movie = Movie.objects.get(id=id)
@@ -33,6 +36,7 @@ def show(request, id):
     template_data['rating_options'] = [1, 2, 3, 4, 5]
     return render(request, 'movies/show.html', {'template_data': template_data})
 
+
 @login_required
 def create_review(request, id):
     if request.method == 'POST' and request.POST['comment'] !='':
@@ -46,6 +50,7 @@ def create_review(request, id):
     else:
         return redirect('movies.show', id=id)
     
+
 @login_required
 def submit_rating(request, id):
     if request.method != 'POST':
@@ -68,6 +73,7 @@ def submit_rating(request, id):
 
     return redirect('movies.show', id=id)
 
+
 @login_required
 def edit_review(request, id, review_id):
     review = get_object_or_404(Review, id=review_id)
@@ -89,13 +95,43 @@ def edit_review(request, id, review_id):
     else:
         return redirect('movies.show', id=id)
     
+
 @login_required
 def delete_review(request, id, review_id):
     review = get_object_or_404(Review, id=review_id, user=request.user)
     review.delete()
     return redirect ('movies.show', id=id)
 
+
 def report_review(request, review_id):
     review = get_object_or_404(Review, id=review_id)
     review.delete()
     return redirect ('movies.show', id=id)
+
+
+# ---------------------------
+# ADMIN STATISTICS VIEW
+# ---------------------------
+
+@login_required
+def admin_stats(request):
+    # -----------------------------
+    # MOST REVIEWED MOVIES (handle ties)
+    # -----------------------------
+    reviewed_counts = Movie.objects.annotate(review_count=Count('review'))
+    max_reviews = reviewed_counts.aggregate(max_count=Max('review_count'))['max_count'] or 0
+    most_reviewed_movies = reviewed_counts.filter(review_count=max_reviews)
+
+    # -----------------------------
+    # MOST PURCHASED MOVIES (handle ties)
+    # -----------------------------
+    purchased_counts = Movie.objects.annotate(purchase_count=Sum('item__quantity'))
+    max_purchases = purchased_counts.aggregate(max_count=Max('purchase_count'))['max_count'] or 0
+    most_purchased_movies = purchased_counts.filter(purchase_count=max_purchases)
+
+    template_data = {}
+    template_data['title'] = 'Admin Statistics'
+    template_data['most_reviewed_movies'] = most_reviewed_movies
+    template_data['most_purchased_movies'] = most_purchased_movies
+
+    return render(request, 'movies/admin_stats.html', {'template_data': template_data})
