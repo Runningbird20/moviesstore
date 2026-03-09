@@ -1,7 +1,8 @@
 from django.shortcuts import render, redirect, get_object_or_404
-from .models import Movie, Review, Rating
+from movies.models import Movie, Review, Rating
 from django.contrib.auth.decorators import login_required
-from django.db.models import Avg
+from django.db.models import Avg, Max, Sum, Count
+from django.contrib.admin.views.decorators import staff_member_required
 
 def index(request):
     search_term = request.GET.get('search')
@@ -99,3 +100,20 @@ def report_review(request, review_id):
     review = get_object_or_404(Review, id=review_id)
     review.delete()
     return redirect ('movies.show', id=id)
+
+@login_required
+@staff_member_required
+def admin_stats(request):
+    reviewed_counts = Movie.objects.annotate(review_count=Count('review'))
+    max_reviews = reviewed_counts.aggregate(max_count=Max('review_count'))['max_count'] or 0
+    most_reviewed_movies = reviewed_counts.filter(review_count=max_reviews)
+
+    purchased_counts = Movie.objects.annotate(purchase_count=Sum('item__quantity'))
+    max_purchases = purchased_counts.aggregate(max_count=Max('purchase_count'))['max_count'] or 0
+    most_purchased_movies = purchased_counts.filter(purchase_count=max_purchases)
+
+    template_data = {}
+    template_data['title'] = 'Admin Statistics'
+    template_data['most_reviewed_movies'] = most_reviewed_movies
+    template_data['most_purchased_movies'] = most_purchased_movies
+    return render(request, 'movies/admin_stats.html', {'template_data': template_data})
