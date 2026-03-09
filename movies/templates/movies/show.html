@@ -10,6 +10,41 @@
         <p><b>Description:</b> {{ template_data.movie.description }}</p>
         <p><b>Price:</b> ${{ template_data.movie.price }}</p>
         <p class="cart-text">
+          <p>
+            <b>Average Rating:</b>
+            {% if template_data.rating_count > 0 %}
+              {{ template_data.average_rating|floatformat:1 }} / 5 ({{ template_data.rating_count }} rating{{ template_data.rating_count|pluralize }})
+            {% else %}
+              No ratings yet
+            {% endif %}
+          </p>
+          {% if user.is_authenticated %}
+                <div class="card shadow p-3 mb-4 rounded">
+                  <b>Your Rating</b>
+                  <form method="POST" action="{% url 'movies.submit_rating' id=template_data.movie.id %}">
+                    {% csrf_token %}
+                    <div class="row g-2 align-items-end">
+                      <div class="col-sm-4">
+                        <label for="rating" class="form-label">Select a rating:</label>
+                        <select class="form-select" name="rating" class="form-select" required>
+                          {% for option in template_data.rating_options %}
+                            <option value="{{ option }}" {% if template_data.user_rating and template_data.user_rating.value == option %}selected{% endif %}>
+                              {{ option }} star{{ option|pluralize }}
+                            </option>
+                          {% endfor %}
+                        </select>
+                      </div>
+                      <div class="col-sm-auto">
+                        <button type="submit" class="btn bg-dark text-white">Submit Rating</button>
+                    </div>
+                  </div>
+                </form>
+                {% if template_data.user_rating %}
+                  <small class="text-muted mt-2 d-block">Saved Rating: {{ template_data.user_rating.value }} stars</small>
+                {% endif %}
+              </div>
+          {% endif %}
+          <p class="cart-text">
           <form method="post" action="{% url 'cart.add' id=template_data.movie.id %}">
             <div class="row">
               {% csrf_token %}
