@@ -34,18 +34,18 @@ def show(request, id):
     template_data['rating_options'] = [1, 2, 3, 4, 5]
     return render(request, 'movies/show.html', {'template_data': template_data})
 
-def top_commenter(request): 
+def top_commenter(request):
     top_user = (
-        Review.objects 
-        .values('user_username')
+        Review.objects
+        .values('user__username')
         .annotate(comment_count=Count('id'))
-        .order_by('-comment_count', 'user_username')
+        .order_by('-comment_count', 'user__username')
         .first()
     )
 
     template_data = {}
     template_data['title'] = 'Top Commenter'
-    template_data['top_user'] = 'top user'
+    template_data['top_user'] = top_user
 
     return render(request, 'movies/top_commenter.html', {'template_data': template_data})
 
