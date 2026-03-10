@@ -1,0 +1,34 @@
+{% extends 'base.html' %}
+{% block content %}
+{% load static %}
+{% load cart_filters %}
+<div class="p-3">
+    <div class="container">
+        <div class="row mt-3">
+            <div class="col mx-auto mb-3">
+                <h2>User with Most Purchases</h2>
+                <hr />
+            </div>
+        </div>
+        <div class="row m-1">
+            <table class="table table-bordered table-striped text-center">
+                <thead>
+                    <tr>
+                        <th scope="col">User ID</th>
+                        <th scope="col">Name</th>
+                        <th scope="col">Number of Purchases</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>{{ template_data.user.id }}</td>
+                        <td>{{ template_data.user.username }}</td>
+                        <td>{{ template_data.quantity }}</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        
+    </div>
+</div>
+{% endblock content %}

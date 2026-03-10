@@ -29,6 +29,7 @@
                     {% if user.is_authenticated %}
                     {% if user.is_staff %}
                     <a class="nav-link" href="{% url 'movies.admin_stats' %}">Admin Stats</a>
+                    <a class="nav-link" href="{% url 'accounts.most_purchases' %}">Most Purchases</a>
                     <a class="nav-link" href="{% url 'movies.top_commenter' %}">Top Commenter</a>
                     {% endif %}
                     <a class="nav-link" href="{% url 'accounts.orders' %}">Orders</a>
