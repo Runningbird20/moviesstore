@@ -1,0 +1,26 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="p-3">
+    <div class="container">
+        <div class="row mt-3">
+            <div class="col mx-auto mb-3">
+                <h2>Top Commmenter</h2>
+                <hr /> 
+
+                {% if template_data.top_user %}
+                    <div class="card shadow p-4">
+                        <h4>User: {{ template_data.top_user.user_username }} </h4>
+                        <p class="mb-0">
+                            <b> Comments Posted: </b> {{ template_data.top_user.comment_count }}
+                        </p>
+                    </div>
+                {%else %}
+                    <div class="alert alert-secondary">
+                        No comments have been posted yet. 
+                    </div> 
+                {%end if%}
+            </div>
+        </div>        
+    </div>
+</div>
+{% endblock content %}
