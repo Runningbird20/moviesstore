@@ -35,6 +35,23 @@ def show(request, id):
     return render(request, 'movies/show.html', {'template_data': template_data})
 
 @login_required
+def top_commenter(request):
+    top_user = (
+        Review.objects
+        .values('user__username')
+        .annotate(comment_count=Count('id'))
+        .order_by('-comment_count', 'user__username')
+        .first()
+    )
+
+    template_data = {}
+    template_data['title'] = 'Top Commenter'
+    template_data['top_user'] = top_user
+
+    return render(request, 'movies/top_commenter.html', {'template_data': template_data})
+
+
+@login_required
 def create_review(request, id):
     if request.method == 'POST' and request.POST['comment'] !='':
         movie = Movie.objects.get(id=id)
