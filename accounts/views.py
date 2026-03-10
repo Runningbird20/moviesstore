@@ -4,6 +4,7 @@ from django.shortcuts import redirect
 from .forms import CustomUserCreationForm, CustomErrorList
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
+from cart.models import Order, Item
 
 @login_required
 def logout(request):
@@ -53,3 +54,30 @@ def orders(request):
     template_data['title'] = 'Orders'
     template_data['orders'] = request.user.order_set.all
     return render(request, 'accounts/order.html', {'template_data': template_data})
+
+@login_required
+def most_purchases(request):
+    if request.user.is_superuser:
+        template_data = {}
+        purchases_by_user = {}
+        for item in Item.objects.all():
+            user = item.order.user
+            quantity = item.quantity
+
+            if (not user in purchases_by_user):
+                purchases_by_user[user] = 0
+            purchases_by_user[user] += quantity
+
+        sorted_dict = {}
+        for key in sorted(purchases_by_user, key=purchases_by_user.get):
+            sorted_dict[key] = purchases_by_user[key]
+
+        most_user = list(sorted_dict)[-1]
+        most_quantity = sorted_dict[most_user]
+        
+        template_data['user'] = most_user
+        template_data['quantity'] = most_quantity
+        return render(request, 'accounts/most_purchases.html', {'template_data': template_data})
+
+    else:
+        return redirect('home.index')
