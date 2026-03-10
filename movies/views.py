@@ -34,6 +34,7 @@ def show(request, id):
     template_data['rating_options'] = [1, 2, 3, 4, 5]
     return render(request, 'movies/show.html', {'template_data': template_data})
 
+@login_required
 def top_commenter(request):
     top_user = (
         Review.objects
